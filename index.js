@@ -5,6 +5,8 @@ import connection from "./database/connection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
 import UserRoutes from "./routes/user.js";
+import PublicationRoutes from "./routes/publication.js";
+import FollowRoutes from "./routes/follow.js";
 
 //Mensajde de bienvenida para verificar que el servidor esta corriendo
 console.log("API Node en ejecución");
@@ -28,6 +30,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 //Configurar las rutas de la API
 app.use('/api/user', UserRoutes);
+app.use('/api/publication', PublicationRoutes);
+app.use('/api/follow', FollowRoutes);
 
 //Ruta de prueba
 app.get('/ruta-prueba', (req, res) => {
