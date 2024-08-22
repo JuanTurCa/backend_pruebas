@@ -4,6 +4,7 @@ import express from "express";
 import connection from "./database/connection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
+import UserRoutes from "./routes/user.js";
 
 //Mensajde de bienvenida para verificar que el servidor esta corriendo
 console.log("API Node en ejecución");
@@ -17,8 +18,8 @@ const port = process.env.PORT || 3900;
 
 //Configurar cors para hacer las peticiones correctamente
 app.use(cors({
-    origen: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'] //Métodos permitidos para las peticiones
+    origin: '*', // debe ser 'origin' en lugar de 'origen'
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
 // Decodificar los datos desde los formularios para convertirlos en objetos JS
@@ -26,6 +27,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 //Configurar las rutas de la API
+app.use('/api/user', UserRoutes);
+
 //Ruta de prueba
 app.get('/ruta-prueba', (req, res) => {
     return res.status(200).json(
