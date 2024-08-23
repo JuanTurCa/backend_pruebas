@@ -26,23 +26,23 @@ app.use(cors({
 
 // Decodificar los datos desde los formularios para convertirlos en objetos JS
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //Configurar las rutas de la API
 app.use('/api/user', UserRoutes);
 app.use('/api/publication', PublicationRoutes);
 app.use('/api/follow', FollowRoutes);
 
-//Ruta de prueba
-app.get('/ruta-prueba', (req, res) => {
-    return res.status(200).json(
-        {
-        'id': 1,
-        'name': 'Juan Manuel',
-        'username': 'jmtc',
-        }
-    );
-});
+//Ruta de prueba, cuando sea necesario
+//app.get('/ruta-prueba', (req, res) => {
+//    return res.status(200).json(
+//        {
+//            'id': 1,
+//            'name': 'Juan Manuel',
+//          'username': 'jmtc',
+//      }
+//  );
+//});
 
 //Otras configuraciones
 
