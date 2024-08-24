@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import { login, register, testUser} from "../controllers/user.js";
+import { login, register, testUser, profile} from "../controllers/user.js";
 import { ensureAuth } from "../middlewares/auth.js";
 
 
@@ -9,6 +9,7 @@ router.get('/test-user', ensureAuth,testUser); //Solo cuando se quiera probar
 // .get es para hacer pruebas
 router.post('/register', register);
 router.post('/login', login); //endpoint
+router.get('/profile/:id', ensureAuth, profile);
 
 //Exportar el router
 export default router;

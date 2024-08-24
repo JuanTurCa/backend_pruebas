@@ -132,3 +132,42 @@ export const login = async (req, res) => {
 
     }
 }
+
+//Metodo para mostrar el perfil de un usuario
+export const profile = async (req, res) => {
+    try {
+        //Obtener el id del usuario desde la url petición
+        const userId = req.params.id;
+
+        //Buscar el usuario en la base de datos y excluimos los datos que no queremos mostrar
+        const user = await User.findById(userId).select("-password -__v -role -created_at -email");
+
+        //Verificar si el usuario existe
+        if (!user) {
+            return res.status(404).send({
+                status: "error",
+                message: "Usuario no encontrado"
+            });
+        }
+
+        //Devolver el usuario encontrado
+        return res.status(200).json({
+            status: "success",
+            user
+        });
+
+
+        return res.status(200).send({
+            status: "success",
+            message: "Metodo Profile",
+        });
+
+    }catch(error){
+        //Manejo de errores
+        console.log("Error al obtener el perfil de usuario", error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener el perfil de usuario"
+        });
+    }
+};
