@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2"; //Importa el paginador de mongoose
 
 // Modelo que se usa para la colección de usuarios en la base de datos
 const UserSchema = Schema({
@@ -12,6 +13,9 @@ const UserSchema = Schema({
     image: {type: String, default: "avatar.png"},
     created_at: {type: Date, default: Date.now},
 });
+
+// Agrega el paginador/pluggin al modelo UserSchema
+UserSchema.plugin(mongoosePaginate);
 
 // Exporta el modelo UserSchema con el nombre User
 export default model("User", UserSchema, "users");

@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import { login, register, testUser, profile} from "../controllers/user.js";
+import { login, register, testUser, profile, listUsers} from "../controllers/user.js";
 import { ensureAuth } from "../middlewares/auth.js";
 
 
@@ -10,6 +10,7 @@ router.get('/test-user', ensureAuth,testUser); //Solo cuando se quiera probar
 router.post('/register', register);
 router.post('/login', login); //endpoint
 router.get('/profile/:id', ensureAuth, profile);
+router.get('/list/:page?', ensureAuth, listUsers);
 
 //Exportar el router
 export default router;

@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt"; //Libreria para cifrar contraseñas
 import { createToken } from "../services/jwt.js";
+import { parse } from "dotenv";
 
 //Metodo de prueba
 export const testUser = (req, res) => {
@@ -155,19 +156,60 @@ export const profile = async (req, res) => {
             status: "success",
             user
         });
-
-
-        return res.status(200).send({
-            status: "success",
-            message: "Metodo Profile",
-        });
-
     }catch(error){
         //Manejo de errores
         console.log("Error al obtener el perfil de usuario", error);
         return res.status(500).send({
             status: "error",
             message: "Error al obtener el perfil de usuario"
+        });
+    }
+};
+
+//Metodo para mostrar todos los usuarios con Paginación de MongoDB
+export const listUsers = async (req, res) => {
+    try{
+        //Gestinar paginas
+        //Controlar la pagina actual, la que se este solicitando
+        let page = req.params.page || 1; //Si no se recibe el parametro de la pagina se pone la 1
+        //let page = rep.params.page ? parseInt(req.params.page, 10) : 1; //Si se recibe el parametro de la pagina se convierte a entero
+
+        //Configurar los items por pagina
+        let itemsPerPage = req.query.limit ? parseInt(req.query.limit, 10) : 2; //Si no se recibe el parametro de items por pagina se pone 3
+
+        //Realizar consulta paginada
+        const opcions = {
+            page: page,
+            limit: itemsPerPage,
+            select: "-password -email -role -__v",
+        };
+        const users = await User.paginate({}, opcions);
+
+        //Si no hay usuarios disponibles en mongoDB
+        if (!users || users.docs.length === 0) {
+            return res.status(404).send({
+                status: "error",
+                message: "No hay usuarios disponibles"
+            });
+        }
+
+        //De donde salen estos datos??
+        //Devolver la consulta paginada (para FrontEnd)
+        return res.status(200).send({
+            status: "success",
+            //Como se va ver el resultado en el FrontEnd paginado
+            users: users.docs,
+            totalDocs: users.totalDocs,
+            totalPages: users.totalPages,
+            currentPage: users.page
+        });
+
+    }catch(error){
+        //Manejo de errores
+        console.log("Error al obtener la lista de usuarios", error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error al obtener la lista de usuarios"
         });
     }
 };
