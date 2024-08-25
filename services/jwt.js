@@ -1,8 +1,12 @@
 import jwt from 'jwt-simple';
 import moment from 'moment';
+import dotenv from 'dotenv';
+
+//Cargar las variables de entorno desde el archivo .env
+dotenv.config();
 
 //Clave secreta para el token
-const secret = '159236874ABCdef*';
+const secret = process.env.secret;
 
 //Generar el token
 const createToken = (user) => {

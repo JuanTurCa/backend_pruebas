@@ -1,8 +1,22 @@
 import { Router } from "express";
 const router = Router();
-import { login, register, testUser, profile, listUsers} from "../controllers/user.js";
+import { testUser, register, login, profile, listUsers, updateUser, uploadImage } from "../controllers/user.js";
 import { ensureAuth } from "../middlewares/auth.js";
+import multer from "multer";
 
+//Configuracion de subida de archivos
+const storage = multer.diskStorage({
+    //Configurar donde se guardaran los archivos
+    destination: (req, file, cb) => {
+        cb(null, './uploads/avatar');
+    },
+    //Configurar el nombre del archivo
+    filename: (req, file, cb) => {
+        cb(null, "avatar_" + Date.now() + "_" + file.originalname);
+    }
+});
+
+const uploads = multer({ storage });
 
 //Definir las rutas para este user
 router.get('/test-user', ensureAuth,testUser); //Solo cuando se quiera probar
@@ -11,6 +25,8 @@ router.post('/register', register);
 router.post('/login', login); //endpoint
 router.get('/profile/:id', ensureAuth, profile);
 router.get('/list/:page?', ensureAuth, listUsers);
+router.put('/update/', ensureAuth, updateUser);
+router.post('/upload-image/', [uploads.single("file0")], uploadImage);
 
 //Exportar el router
 export default router;

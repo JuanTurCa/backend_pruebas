@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt"; //Libreria para cifrar contraseñas
 import { createToken } from "../services/jwt.js";
-import { parse } from "dotenv";
+import fs from "fs";
 
 //Metodo de prueba
 export const testUser = (req, res) => {
@@ -210,6 +210,125 @@ export const listUsers = async (req, res) => {
         return res.status(500).send({
             status: "error",
             message: "Error al obtener la lista de usuarios"
+        });
+    }
+};
+
+//Metodo para actualizar los datos de si mismo (usuario autenticado)
+export const updateUser = async (req, res) => {
+    try {
+        //Obtener la informacion del usuario a actualizar
+        let userIdentity = req.user;
+        let userToUpdate = req.body;
+
+        //Eliminar campos que no se pueden actualizar
+        delete userToUpdate.iat;
+        delete userToUpdate.exp;
+        delete userToUpdate.role;
+
+        //Comprobar si el usuario ya existe
+        const users = await User.find({
+            $or: [
+                {email: userToUpdate.email},
+                {nick: userToUpdate.nick}
+            ]
+        }).exec(); //Ejecutar la consulta
+
+        //Verificar si el usuario esta duplicado y evitar que se actualice
+        const isDuplicateUser = users.some(user => {
+            return user && user._id.toString() !== userIdentity._id.toString();
+        });
+
+        if (isDuplicateUser) {
+            return res.status(409).send({
+                status: "error",
+                message: "Solo puedes actualizar tu cuenta"
+            });
+        }
+
+        //Cifrar la contraseña si se proporciona
+        if (userToUpdate.password) {
+            try{
+                let pwd = await bcrypt.hash(userToUpdate.password, 10);
+                userToUpdate.password = pwd;
+            }catch(hashError){
+                return res.status(500).send({
+                    status: "error",
+                    message: "Error al cifrar la contraseña"
+                });
+            }
+        } else {
+            delete userToUpdate.password;
+        }
+
+        //Buscar y actualizar el usuario en la base de datos mongoDB
+        let userUpdated = await User.findByIdAndUpdate(userIdentity.userId, userToUpdate, {new: true});
+        if (!userUpdated) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se ha podido actualizar el usuario"
+            });
+        }
+
+        //Devolver el usuario actualizado
+        return res.status(200).send({
+            status: "success",
+            message: "El usuario se ha actualizado correctamente",
+            user: userUpdated
+        });
+    }catch(error){
+        //Manejo de errores
+        console.log("Error al actualizar el usuario", error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error al actualizar el usuario"
+        });
+    }
+};
+
+//Metodo para subir la imagen del usuario y actualizar el campo image
+export const uploadImage = async (req, res) => {
+    try{
+        //Obtener el archivo de la imagen y comprobar si existe
+        if (!req.file) {
+            return res.status(404).send({
+                status: "error",
+                message: "No se ha subido ninguna imagen"
+            });
+        }
+
+        //Obtener el nombre del archivo subido
+        let image = req.file.originalname;
+
+        //Obtener la extencion del archivo
+        const imageSplit = image.split(".");
+        const extension = imageSplit[imageSplit.length - 1];
+
+        //Validar la extencion del archivo
+        if(!["png", "jpg", "jpeg", "gif"]){
+            //Eliminar el archivo subido
+            const filePath = req.file.path; //Obtener la ruta del archivo
+            fs.unlinkSync(filePath); //Eliminar el archivo
+
+            //Devolver un mensaje de error
+            return res.status(404).send({
+                status: "error",
+                message: "La extensión del archivo no es valida"
+            });
+
+        }
+
+        return res.status(200).send({
+            status: "success",
+            message: "Imagen subida correctamente"
+        });
+
+    }catch(error){
+        //Manejo de errores
+        console.log("Error al subir la imagen del usuario", error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error al subir la imagen del usuario"
         });
     }
 };
