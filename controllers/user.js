@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import bcrypt from "bcrypt"; //Libreria para cifrar contraseñas
 import { createToken } from "../services/jwt.js";
 import fs from "fs";
+import path from "path";
 
 //Metodo de prueba
 export const testUser = (req, res) => {
@@ -31,8 +32,8 @@ export const register = async (req, res) => {
         //Busca si ya existe algun atributo necesario y si existe devuelve un mesaje
         const existingUser = await User.findOne({
             $or: [
-                {email: user_to_save.email.toLowerCase()},
-                {nick: user_to_save.nick.toLowerCase()}
+                { email: user_to_save.email.toLowerCase() },
+                { nick: user_to_save.nick.toLowerCase() }
             ]
         });
 
@@ -58,7 +59,7 @@ export const register = async (req, res) => {
             params,
             user_to_save
         });
-    }catch(error){
+    } catch (error) {
         //Manejo de errores
         console.log("Error en el registro de usuario", error);
         return res.status(500).send({
@@ -70,7 +71,7 @@ export const register = async (req, res) => {
 
 //Metodo - Login de usuario usando JWT (Json Web Token)
 export const login = async (req, res) => {
-    try{
+    try {
         //Obtener los datos de la peticion para los datos del usuario
         let params = req.body;
 
@@ -84,7 +85,7 @@ export const login = async (req, res) => {
 
         //Buscar el usuario en la base de datos: email recibido
         //Filtro con MongoDB y el Schema
-        const user = await User.findOne({email: params.email.toLowerCase()});
+        const user = await User.findOne({ email: params.email.toLowerCase() });
 
         //Si no existe el usuario
         if (!user) {
@@ -123,7 +124,7 @@ export const login = async (req, res) => {
             }
         });
 
-    }catch(error){
+    } catch (error) {
         //Manejo de errores
         console.log("Error en el login de usuario", error);
         return res.status(500).send({
@@ -156,7 +157,7 @@ export const profile = async (req, res) => {
             status: "success",
             user
         });
-    }catch(error){
+    } catch (error) {
         //Manejo de errores
         console.log("Error al obtener el perfil de usuario", error);
         return res.status(500).send({
@@ -168,7 +169,7 @@ export const profile = async (req, res) => {
 
 //Metodo para mostrar todos los usuarios con Paginación de MongoDB
 export const listUsers = async (req, res) => {
-    try{
+    try {
         //Gestinar paginas
         //Controlar la pagina actual, la que se este solicitando
         let page = req.params.page || 1; //Si no se recibe el parametro de la pagina se pone la 1
@@ -204,7 +205,7 @@ export const listUsers = async (req, res) => {
             currentPage: users.page
         });
 
-    }catch(error){
+    } catch (error) {
         //Manejo de errores
         console.log("Error al obtener la lista de usuarios", error);
         return res.status(500).send({
@@ -229,8 +230,8 @@ export const updateUser = async (req, res) => {
         //Comprobar si el usuario ya existe
         const users = await User.find({
             $or: [
-                {email: userToUpdate.email},
-                {nick: userToUpdate.nick}
+                { email: userToUpdate.email },
+                { nick: userToUpdate.nick }
             ]
         }).exec(); //Ejecutar la consulta
 
@@ -248,10 +249,10 @@ export const updateUser = async (req, res) => {
 
         //Cifrar la contraseña si se proporciona
         if (userToUpdate.password) {
-            try{
+            try {
                 let pwd = await bcrypt.hash(userToUpdate.password, 10);
                 userToUpdate.password = pwd;
-            }catch(hashError){
+            } catch (hashError) {
                 return res.status(500).send({
                     status: "error",
                     message: "Error al cifrar la contraseña"
@@ -262,7 +263,7 @@ export const updateUser = async (req, res) => {
         }
 
         //Buscar y actualizar el usuario en la base de datos mongoDB
-        let userUpdated = await User.findByIdAndUpdate(userIdentity.userId, userToUpdate, {new: true});
+        let userUpdated = await User.findByIdAndUpdate(userIdentity.userId, userToUpdate, { new: true });
         if (!userUpdated) {
             return res.status(404).send({
                 status: "error",
@@ -276,7 +277,7 @@ export const updateUser = async (req, res) => {
             message: "El usuario se ha actualizado correctamente",
             user: userUpdated
         });
-    }catch(error){
+    } catch (error) {
         //Manejo de errores
         console.log("Error al actualizar el usuario", error);
         return res.status(500).send({
@@ -286,49 +287,108 @@ export const updateUser = async (req, res) => {
     }
 };
 
-//Metodo para subir la imagen del usuario y actualizar el campo image
-export const uploadImage = async (req, res) => {
+// Método para subir AVATAR (imagen de perfil) y actualizar el campo image del User
+export const uploadAvatar = async (req, res) => {
+    try {
+      // Obtener el archivo de la imagen y comprobar si existe
+      if(!req.file){
+        return res.status(404).send({
+          status: "error",
+          message: "Error la petición no incluye la imagen"
+        });
+      }
+
+      // Obtener el nombre del archivo
+      let image = req.file.originalname;
+
+      // Obtener la extensión del archivo
+      const imageSplit = image.split(".");
+      const extension = imageSplit[imageSplit.length -1];
+
+      // Validar la extensión
+      if(!["png", "jpg", "jpeg", "gif"].includes(extension.toLowerCase())){
+        // Borrar archivo subido
+        const filePath = req.file.path;
+        fs.unlinkSync(filePath);
+        return res.status(404).send({
+          status: "error",
+          message: "Extensión del archivo inválida. Solo se permite: png, jpg, jpeg, gif"
+        });
+      }
+      // Comprobar tamaño del archivo (pj: máximo 1MB)
+      const fileSize = req.file.size;
+      const maxFileSize = 1 * 1024 * 1024; // 1 MB
+
+      if (fileSize > maxFileSize) {
+        const filePath = req.file.path;
+        fs.unlinkSync(filePath);
+
+        return res.status(400).send({
+          status: "error",
+          message: "El tamaño del archivo excede el límite (máx 1 MB)"
+        });
+      }
+
+      // Guardar la imagen en la BD
+      const userUpdated = await User.findOneAndUpdate(
+        {_id: req.user.userId},
+        { image: req.file.filename },
+        { new: true}
+      );
+
+      console.log("userUpdated", userUpdated.name);
+      // verificar si la actualización fue exitosa
+      if (!userUpdated) {
+        return res.status(500).send({
+          status: "error",
+          message: "Eror en la subida de la imagen"
+        });
+      }
+
+      // Devolver respuesta exitosa
+      return res.status(200).json({
+        status: "success",
+        user: userUpdated,
+        file: req.file
+      });
+
+    } catch (error) {
+      console.log("Error al subir archivos", error)
+      return res.status(500).send({
+        status: "error",
+        message: "Error al subir archivos"
+      });
+    }
+  }
+
+  //Metodo para mostrar la imagen de perfil de un usuario
+  export const avatar = async (req, res) => {
     try{
-        //Obtener el archivo de la imagen y comprobar si existe
-        if (!req.file) {
-            return res.status(404).send({
-                status: "error",
-                message: "No se ha subido ninguna imagen"
-            });
-        }
+        //Obtener el parametro del archivo desde la url
+        const file = req.params.file;
 
-        //Obtener el nombre del archivo subido
-        let image = req.file.originalname;
+        //Const filePath
+        const filePath = `./uploads/avatars/${file}`; //Ruta del archivo
 
-        //Obtener la extencion del archivo
-        const imageSplit = image.split(".");
-        const extension = imageSplit[imageSplit.length - 1];
+        //Comprobar si el archivo existe
+        fs.stat(filePath, (error, exists) => {
+            if(!filePath){
+                return res.status(404).send({
+                    status: "error",
+                    message: "La imagen no existe"
+                });
+            }
 
-        //Validar la extencion del archivo
-        if(!["png", "jpg", "jpeg", "gif"]){
-            //Eliminar el archivo subido
-            const filePath = req.file.path; //Obtener la ruta del archivo
-            fs.unlinkSync(filePath); //Eliminar el archivo
-
-            //Devolver un mensaje de error
-            return res.status(404).send({
-                status: "error",
-                message: "La extensión del archivo no es valida"
-            });
-
-        }
-
-        return res.status(200).send({
-            status: "success",
-            message: "Imagen subida correctamente"
+            //Devolver la imagen
+            return res.sendFile(path.resolve(filePath));
         });
 
     }catch(error){
         //Manejo de errores
-        console.log("Error al subir la imagen del usuario", error);
+        console.log("Error al obtener la imagen de perfil", error);
         return res.status(500).send({
             status: "error",
-            message: "Error al subir la imagen del usuario"
+            message: "Error al obtener la imagen de perfil"
         });
     }
-};
+  };
