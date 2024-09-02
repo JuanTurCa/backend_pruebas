@@ -143,7 +143,7 @@ export const publicationsUser = async (req, res) => {
     const options = {
       page: page,
       limit: itemsPerPage,
-      sort: { created_at: -1 },
+      sort: { created_at: -1 }, // Ordenar por fecha de creación descendente
       populate: {
         path: 'user_id',
         select: '-password -role -__v -email'
@@ -238,7 +238,7 @@ export const uploadMedia = async (req, res) => {
     }
 
     // Verificar si el archivo realmente existe antes de proceder
-    const actualFilePath  = path.resolve("./uploads/publications/", req.file.filename);
+    const actualFilePath  = path.resolve("./uploads/avatars/publications", req.file.filename);
     try {
       fs.statSync(actualFilePath);
     } catch (error) {
@@ -285,7 +285,7 @@ export const showMedia = async (req, res) => {
     const file = req.params.file;
 
     // Crear el path real de la imagen
-    const filePath = `./uploads/publications/${file}`;
+    const filePath = `./uploads/avatars/publications/${file}`;
 
     // Comprobar si existe el archivo
     fs.stat(filePath, (error, exists) => {

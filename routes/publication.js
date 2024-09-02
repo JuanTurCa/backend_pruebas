@@ -19,7 +19,7 @@ import { checkEntityExists } from "../middlewares/checkEntityExists.js"
 // Configuración de subida de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads/publications/");
+    cb(null, "./uploads/avatars/publications");
   },
   filename: (req, file, cb) => {
     cb(null, "pub-"+Date.now()+"-"+file.originalname);
