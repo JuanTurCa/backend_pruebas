@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"; //Libreria para cifrar contraseñas
 import { createToken } from "../services/jwt.js";
 import fs from "fs";
 import path from "path";
+import { followThisUser } from "../services/followServices.js";
 
 //Metodo de prueba
 export const testUser = (req, res) => {
@@ -141,21 +142,33 @@ export const profile = async (req, res) => {
         //Obtener el id del usuario desde la url petición
         const userId = req.params.id;
 
-        //Buscar el usuario en la base de datos y excluimos los datos que no queremos mostrar
-        const user = await User.findById(userId).select("-password -__v -role -created_at -email");
+        // Verificar si el usuario autenticado esta disponible
+        if(!req.user || !req.user.userId){
+            return res.status(401).send({
+                status: "error",
+                message: "Usuario no autenticado"
+            });
+        }
 
-        //Verificar si el usuario existe
-        if (!user) {
+        //Buscar el usuario en la base de datos y excluimos los datos que no queremos mostrar
+        const userProfile = await User.findById(userId).select("-password -__v -role -created_at -email");
+
+        //Verificar si el usuario no existe
+        if (!userProfile) {
             return res.status(404).send({
                 status: "error",
                 message: "Usuario no encontrado"
             });
         }
 
-        //Devolver el usuario encontrado
+        //Informacion del seguimiento
+        const followInfo = await followThisUser(req.user.userId, userId);
+
+        //Devolver la informacion del perfil del usuario
         return res.status(200).json({
             status: "success",
-            user
+            user: userProfile,
+            followInfo
         });
     } catch (error) {
         //Manejo de errores
