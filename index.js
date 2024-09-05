@@ -7,6 +7,10 @@ import cors from "cors";
 import UserRoutes from "./routes/user.js";
 import PublicationRoutes from "./routes/publication.js";
 import FollowRoutes from "./routes/follow.js";
+//importamos el módulo path para poder trabajar con rutas de archivos
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 //Mensajde de bienvenida para verificar que el servidor esta corriendo
 console.log("API Node en ejecución");
@@ -21,7 +25,9 @@ const port = process.env.PORT || 3900;
 //Configurar cors para hacer las peticiones correctamente
 app.use(cors({
     origin: '*', // debe ser 'origin' en lugar de 'origen'
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'], //Metodos permitidos
+    preflightContinue: false, //Evitar que se envíen las peticiones OPTIONS
+    optionsSuccessStatus: 204 //Para que retorne el status 204
 }));
 
 // Decodificar los datos desde los formularios para convertirlos en objetos JS
@@ -32,6 +38,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/user', UserRoutes);
 app.use('/api/publication', PublicationRoutes);
 app.use('/api/follow', FollowRoutes);
+
+//Configurar la ruta de los archivos estáticos
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+//Configurar la ruta de archivos estáticos para las imágenes de los avatares
+app.use('/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars')));
+
+//Configurar la ruta de archivos estáticos para las imágenes de las publicaciones
+app.use('/uploads/publications', express.static(path.join(__dirname, 'uploads/publications')));
 
 //Ruta de prueba, cuando sea necesario
 //app.get('/ruta-prueba', (req, res) => {
