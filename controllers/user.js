@@ -191,7 +191,7 @@ export const listUsers = async (req, res) => {
         //let page = rep.params.page ? parseInt(req.params.page, 10) : 1; //Si se recibe el parametro de la pagina se convierte a entero
 
         //Configurar los items por pagina
-        let itemsPerPage = req.query.limit ? parseInt(req.query.limit, 10) : 2; //Si no se recibe el parametro de items por pagina se pone 3
+        let itemsPerPage = req.query.limit ? parseInt(req.query.limit, 10) : 8; //Si no se recibe el parametro de items por pagina se pone 3
 
         //Realizar consulta paginada
         const opcions = {
