@@ -34,3 +34,4 @@ router.get('/counters/:id?', ensureAuth, counters);
 
 //Exportar el router
 export default router;
+//No quiere subir imagenes
