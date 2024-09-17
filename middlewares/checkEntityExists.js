@@ -36,8 +36,7 @@ export const checkEntityExists = (model, ownerIdField = 'id') => {
         });
       }
 
-      // Agregar la entidad encontrada al objeto request para que esté disponible en los controladores,
-      //si es necesario
+      // Agregar la entidad encontrada al objeto request para que esté disponible en los controladores, si es necesario
       req.entity = entityExists;
 
       // Pasar al siguiente middleware
