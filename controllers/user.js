@@ -3,8 +3,6 @@ import Follow from "../models/follows.js";
 import Publication from "../models/publications.js";
 import bcrypt from "bcrypt"; //Libreria para cifrar contraseñas
 import { createToken } from "../services/jwt.js";
-import fs from "fs";
-import path from "path";
 import { followThisUser } from "../services/followServices.js";
 
 //Metodo de prueba

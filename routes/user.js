@@ -27,7 +27,7 @@ router.post('/register', register);
 router.post('/login', login); //endpoint
 router.get('/profile/:id', ensureAuth, profile);
 router.get('/list/:page?', ensureAuth, listUsers);
-router.put('/update/', ensureAuth, updateUser);
+router.put('/update', ensureAuth, updateUser);
 router.post('/upload-image', [ensureAuth, checkEntityExists(User, 'user_id'),uploads.single("file0")], uploadAvatar);
 router.get('/avatar/:file', avatar);
 router.get('/counters/:id?', ensureAuth, counters);

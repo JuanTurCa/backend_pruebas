@@ -1,7 +1,7 @@
 //Importaciones
 import { Router } from "express";
 const router = Router();
-import { following, testFollow, saveFollow, unfollow, followers } from "../controllers/follow.js";
+import { testFollow, saveFollow, unfollow, following, followers } from "../controllers/follow.js";
 import { ensureAuth } from "../middlewares/auth.js";
 
 //Definir las rutas para Follow
