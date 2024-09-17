@@ -6,9 +6,7 @@ import multer from "multer";
 import Publication from "../models/publications.js"
 import { checkEntityExists } from "../middlewares/checkEntityExists.js"
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from 'cloudinary';
-const { v2: cloudinaryV2 } = cloudinary;
-
+import { v2 as cloudinary } from 'cloudinary';
 
 // Configuración de subida de archivos
 const storage = new CloudinaryStorage({

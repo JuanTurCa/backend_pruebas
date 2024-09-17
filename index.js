@@ -6,9 +6,7 @@ import UserRoutes from "./routes/user.js";
 import PublicationRoutes from "./routes/publication.js";
 import FollowRoutes from "./routes/follow.js";
 import dotenv from "dotenv";
-import cloudinary from 'cloudinary';
-const { v2: cloudinaryV2 } = cloudinary;
-
+import { v2 as cloudinary } from 'cloudinary';
 
 dotenv.config();
 
