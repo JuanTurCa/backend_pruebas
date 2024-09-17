@@ -83,7 +83,7 @@ export const saveFollow = async (req, res) =>{
         message: "Usuario seguido no encontrado"
       });
     }
-
+    
     // Combinar datos de follow y followedUser
     const combinedFollowData = {
       ...followStored.toObject(),
@@ -177,7 +177,7 @@ export const following = async (req, res) => {
       },
       lean: true
     }
-
+    
     // Buscar en la BD los seguidores y popular los datos de los usuarios
     const follows = await Follow.paginate({ following_user: userId }, options);
 
@@ -230,7 +230,7 @@ export const followers = async (req, res) => {
       },
       lean: true
     }
-
+    
     // Buscar en la BD los seguidores y popular los datos de los usuarios
     const follows = await Follow.paginate({ followed_user: userId }, options);
 
