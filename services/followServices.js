@@ -14,8 +14,7 @@ export const followUserIds = async (req, res) => {
       });
     }
 
-    // Obtener el array con la información de los usuarios que estoy siguiendo
-    //(el usuario autenticado está siguiendo)
+    // Obtener el array con la información de los usuarios que estoy siguiendo (el usuario autenticado está siguiendo)
     let following = await Follow.find({ "following_user": identityUserId})
       .select({"followed_user": 1, "_id": 0})
       .exec();

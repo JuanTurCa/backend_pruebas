@@ -1,5 +1,5 @@
 import Follow from "../models/follows.js"
-import User from "../models/user.js"
+import User from "../models/users.js"
 import { followUserIds } from "../services/followServices.js"
 
 

@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoosePaginate from 'mongoose-paginate-v2';
 
-// Definir el esquema de la publicación
 const PublicationSchema = Schema({
   user_id: {
     type: Schema.ObjectId,
@@ -18,6 +17,7 @@ const PublicationSchema = Schema({
     default: Date.now
   }
 });
+
 
 // Añadir pluggin de paginación
 PublicationSchema.plugin(mongoosePaginate);
